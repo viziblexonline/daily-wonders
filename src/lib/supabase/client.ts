@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -12,17 +13,12 @@ export const isSupabaseConfigured = Boolean(
 
 let client: SupabaseClient | null = null;
 
+/** Browser Supabase client — PKCE verifier stored in cookies via @supabase/ssr */
 export function getSupabase(): SupabaseClient | null {
   if (!isSupabaseConfigured) return null;
+  if (typeof window === "undefined") return null;
   if (!client) {
-    client = createClient(url!, anonKey!, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: "pkce",
-      },
-    });
+    client = createBrowserClient(url!, anonKey!);
   }
   return client;
 }

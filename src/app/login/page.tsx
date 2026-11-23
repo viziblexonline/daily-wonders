@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+function LoginContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const params = useSearchParams();
+  const authError = params.get("error");
 
   useEffect(() => {
     if (!loading && user) router.replace("/account");
@@ -22,11 +24,30 @@ export default function LoginPage() {
         <h1 className="mt-2 font-display text-5xl tracking-wider md:text-6xl">
           SIGN IN
         </h1>
-        <p className="mt-3 mb-8 text-center text-sm text-dw-muted">
+        <p className="mt-3 mb-4 text-center text-sm text-dw-muted">
           Email &amp; password or continue with Google.
         </p>
+        {authError && (
+          <p className="mb-6 max-w-md text-center text-sm text-red-400">
+            {authError}
+          </p>
+        )}
         <AuthForm mode="login" />
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center pt-24 text-dw-muted">
+          Loading…
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

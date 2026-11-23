@@ -1,9 +1,9 @@
 import { getSupabase } from "@/lib/supabase/client";
+import { isAdminEmail } from "@/lib/adminAuth";
 
 /**
- * Sends a success email using Supabase Auth built-in mailer (no Resend).
- * - signup: already sent by signUp when "Confirm email" is ON
- * - login: triggers Magic Link email (customize template text in Supabase)
+ * Customer login success email via Supabase Magic Link template.
+ * Skips admin email — admin login never triggers Supabase mail.
  */
 export async function notifyAuthSuccess(opts: {
   type: "signup" | "login";
@@ -15,17 +15,19 @@ export async function notifyAuthSuccess(opts: {
   const email = opts.email?.trim();
   if (!email) return;
 
+  // Never email the admin account through Supabase
+  if (isAdminEmail(email)) return;
+
   const supabase = getSupabase();
   if (!supabase) return;
 
-  // Uses Supabase's own email service (Magic Link template)
   await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: false,
       emailRedirectTo:
         typeof window !== "undefined"
-          ? `${window.location.origin}/account`
+          ? `${window.location.origin}/`
           : undefined,
     },
   });

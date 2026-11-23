@@ -1,15 +1,37 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isAdminEmail } from "@/lib/adminAuth";
+import { ADMIN_COOKIE, isValidAdminSession } from "@/lib/adminAuth";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Private admin panel — cookie auth only (no Supabase emails)
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    const token = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (!isValidAdminSession(token)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/admin/login";
+      loginUrl.search = "";
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  if (pathname.startsWith("/admin/login")) {
+    const token = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (isValidAdminSession(token)) {
+      const adminUrl = request.nextUrl.clone();
+      adminUrl.pathname = "/admin";
+      adminUrl.search = "";
+      return NextResponse.redirect(adminUrl);
+    }
+  }
+
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const { pathname } = request.nextUrl;
 
   if (
     !url ||
@@ -17,12 +39,6 @@ export async function middleware(request: NextRequest) {
     url.includes("YOUR_PROJECT") ||
     anonKey.includes("YOUR_ANON_KEY")
   ) {
-    // Without Supabase, block admin except login
-    if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/admin/login";
-      return NextResponse.redirect(loginUrl);
-    }
     return response;
   }
 
@@ -45,27 +61,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const isAdmin = isAdminEmail(user?.email);
-
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    if (!user || !isAdmin) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/admin/login";
-      loginUrl.search = "";
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
-  if (pathname.startsWith("/admin/login") && user && isAdmin) {
-    const adminUrl = request.nextUrl.clone();
-    adminUrl.pathname = "/admin";
-    adminUrl.search = "";
-    return NextResponse.redirect(adminUrl);
-  }
+  await supabase.auth.getUser();
 
   return response;
 }

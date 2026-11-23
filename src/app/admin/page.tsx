@@ -249,7 +249,8 @@ export default function AdminPage() {
               variant="outline"
               size="sm"
               onClick={async () => {
-                await fetch("/api/admin/logout", { method: "POST" });
+                const { getSupabase } = await import("@/lib/supabase/client");
+                await getSupabase()?.auth.signOut();
                 router.replace("/admin/login");
                 router.refresh();
               }}

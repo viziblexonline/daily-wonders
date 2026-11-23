@@ -19,8 +19,9 @@ import { slugify } from "@/lib/utils";
 import {
   createProduct as sbCreate,
   deleteProductById as sbDelete,
-  fetchProducts,
   isSupabaseConfigured,
+  isUuid,
+  seedProductsIfEmpty,
   updateProductById as sbUpdate,
   uploadProductImage,
 } from "@/lib/supabase/products";
@@ -103,13 +104,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setProductsError(null);
     try {
       if (isSupabaseConfigured) {
-        const remote = await fetchProducts();
-        if (remote.length > 0) {
-          setProducts(remote);
-        } else {
-          // Empty DB — keep seed so storefront isn't blank
-          setProducts(initialProducts);
-        }
+        // Empty table → seed catalog with real UUIDs (fixes admin "p1" errors)
+        const remote = await seedProductsIfEmpty();
+        setProducts(remote.length ? remote : initialProducts);
       } else {
         const local = loadJSON<Product[]>(LOCAL_PRODUCTS_KEY, initialProducts);
         setProducts(local);
@@ -252,8 +249,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateProduct = useCallback(async (id: string, data: Partial<Product>) => {
     if (isSupabaseConfigured) {
-      const updated = await sbUpdate(id, data);
-      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      // Merge with existing so seed→UUID create has full fields
+      const current = products.find((p) => p.id === id);
+      const merged = { ...current, ...data } as Partial<Product> &
+        Omit<Product, "id" | "slug" | "createdAt">;
+      const updated = await sbUpdate(id, merged);
+      setProducts((prev) => {
+        if (!isUuid(id)) {
+          return [updated, ...prev.filter((p) => p.id !== id)];
+        }
+        return prev.map((p) => (p.id === id ? updated : p));
+      });
       return;
     }
     setProducts((prev) =>
@@ -264,7 +270,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return updated;
       })
     );
-  }, []);
+  }, [products]);
 
   const deleteProduct = useCallback(async (id: string) => {
     if (isSupabaseConfigured) {

@@ -1,6 +1,7 @@
 import type { Product, ProductCategory, ProductType } from "@/types";
 import { getSupabase, isSupabaseConfigured } from "./client";
 import { slugify } from "@/lib/utils";
+import { initialProducts } from "@/data/products";
 
 export type DbProduct = {
   id: string;
@@ -25,6 +26,13 @@ export type DbProduct = {
   variation_options: string[] | null;
   created_at: string;
 };
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isUuid(id: string) {
+  return UUID_RE.test(id);
+}
 
 export function mapDbProduct(row: DbProduct): Product {
   return {
@@ -54,7 +62,9 @@ export function mapDbProduct(row: DbProduct): Product {
   };
 }
 
-function toDbPayload(data: Omit<Product, "id" | "slug" | "createdAt"> & { slug?: string }) {
+function toDbPayload(
+  data: Omit<Product, "id" | "slug" | "createdAt"> & { slug?: string }
+) {
   return {
     name: data.name,
     slug: data.slug ?? slugify(data.name),
@@ -91,6 +101,28 @@ export async function fetchProducts(): Promise<Product[]> {
   return (data as DbProduct[]).map(mapDbProduct);
 }
 
+/** Insert seed catalog into Supabase when table is empty (gets real UUIDs). */
+export async function seedProductsIfEmpty(): Promise<Product[]> {
+  const existing = await fetchProducts();
+  if (existing.length > 0) return existing;
+
+  const supabase = getSupabase();
+  if (!supabase) return initialProducts;
+
+  const rows = initialProducts.map((p) => {
+    const { id: _id, slug, createdAt: _c, ...rest } = p;
+    return toDbPayload({ ...rest, slug });
+  });
+
+  const { data, error } = await supabase
+    .from("products")
+    .insert(rows)
+    .select("*");
+
+  if (error) throw new Error(error.message);
+  return (data as DbProduct[]).map(mapDbProduct);
+}
+
 export async function createProduct(
   data: Omit<Product, "id" | "slug" | "createdAt">
 ): Promise<Product> {
@@ -114,6 +146,30 @@ export async function updateProductById(
 ): Promise<Product> {
   const supabase = getSupabase();
   if (!supabase) throw new Error("Supabase is not configured");
+
+  // Legacy seed ids like "p1" are not UUIDs — insert as a new Supabase row
+  if (!isUuid(id)) {
+    const full = {
+      name: data.name || "Untitled",
+      category: (data.category || "Whey Protein") as ProductCategory,
+      brand: data.brand || "Daily Wonders",
+      type: (data.type || "Protein") as ProductType,
+      price: data.price ?? 0,
+      salePrice: data.salePrice,
+      description: data.description || "",
+      benefits: data.benefits || [],
+      specifications: data.specifications || {},
+      images: data.images || [],
+      rating: data.rating ?? 4.5,
+      reviewCount: data.reviewCount ?? 0,
+      stock: data.stock ?? 0,
+      featured: data.featured ?? false,
+      bestSeller: data.bestSeller ?? false,
+      isNew: data.isNew ?? true,
+      variations: data.variations,
+    };
+    return createProduct(full);
+  }
 
   const payload: Record<string, unknown> = {};
   if (data.name !== undefined) {
@@ -155,6 +211,9 @@ export async function updateProductById(
 export async function deleteProductById(id: string): Promise<void> {
   const supabase = getSupabase();
   if (!supabase) throw new Error("Supabase is not configured");
+
+  // Seed ids are local-only — nothing to delete in Supabase
+  if (!isUuid(id)) return;
 
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw new Error(error.message);

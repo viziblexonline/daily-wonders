@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
+import { isAdminEmail } from "@/lib/adminAuth";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { signIn, signUp, signInWithGoogle, supabaseReady } = useAuth();
@@ -26,6 +27,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setLoading(true);
 
     try {
+      if (isAdminEmail(email)) {
+        setError("Admin account? Use the Admin Login page instead.");
+        router.push("/admin/login");
+        return;
+      }
+
       if (password.length < 6) {
         setError("Password must be at least 6 characters.");
         return;

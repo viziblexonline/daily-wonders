@@ -41,7 +41,20 @@ https://rodnhnjybgikdqfaszim.supabase.co/auth/v1/callback
 1. **Authentication → Providers → Google** → Enable
 2. Paste Client ID + Client Secret → Save
 
-## 4. Test
-- `/signup` → email + password
-- `/login` → email + password
-- **Continue with Google** on both pages
+## 4. Success emails (login / signup)
+
+Emails are sent via **Resend**.
+
+1. Create free account: https://resend.com
+2. API Keys → Create → copy key (`re_...`)
+3. Add to Vercel → Project → Settings → Environment Variables:
+   - `RESEND_API_KEY` = `re_...`
+   - `EMAIL_FROM` = `Daily Wonders <onboarding@resend.dev>` (test)
+4. Redeploy
+
+> With `onboarding@resend.dev` you can only send to **your Resend account email** until you verify your domain (e.g. `noreply@dailywonders.co.uk`).
+
+## 5. Test
+- `/signup` → email + password → success banner + inbox email
+- `/login` → email + password → success banner + inbox email
+- **Continue with Google** → same

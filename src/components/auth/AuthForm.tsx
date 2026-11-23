@@ -38,10 +38,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           return;
         }
         setInfo(
-          "Account created. If email confirmation is enabled, check your inbox — otherwise you’re ready to shop."
+          "Account created successfully! A confirmation email is on the way."
         );
-        // If session is created immediately, go to account
-        router.push("/account");
+        router.push("/account?auth=signup");
         return;
       }
 
@@ -50,7 +49,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         setError(err);
         return;
       }
-      router.push("/account");
+      setInfo("Login successful! Sending confirmation to your email…");
+      router.push("/account?auth=login");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,6 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       setError(err);
       setGoogleLoading(false);
     }
-    // On success browser redirects to Google
   };
 
   return (
@@ -141,7 +140,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         {error && <p className="text-sm text-red-400">{error}</p>}
         {info && <p className="text-sm text-dw-lime">{info}</p>}
 
-        <Button type="submit" className="w-full" size="lg" disabled={loading || !supabaseReady}>
+        <Button
+          type="submit"
+          className="w-full"
+          size="lg"
+          disabled={loading || !supabaseReady}
+        >
           {loading
             ? isSignup
               ? "Creating account…"

@@ -4,14 +4,18 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/account";
 
   if (code) {
     const supabase = await createSupabaseServer();
     if (supabase) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        return NextResponse.redirect(`${origin}${next}`);
+        const createdAt = data.user?.created_at
+          ? new Date(data.user.created_at).getTime()
+          : 0;
+        const isNew = Date.now() - createdAt < 60_000;
+        const auth = isNew ? "signup" : "login";
+        return NextResponse.redirect(`${origin}/account?auth=${auth}`);
       }
       return NextResponse.redirect(
         `${origin}/login?error=${encodeURIComponent(error.message)}`

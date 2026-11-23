@@ -44,6 +44,10 @@ create trigger products_updated_at
 before update on public.products
 for each row execute function public.set_updated_at();
 
+-- Table privileges for API roles
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on table public.products to anon, authenticated;
+
 -- RLS: public read, anon write for admin (tighten later with auth)
 alter table public.products enable row level security;
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/context/AuthContext";
 import { StoreProvider } from "@/context/StoreContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -32,13 +33,15 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-dw-black text-white antialiased">
-        <StoreProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-          <CartDrawer />
-          <SearchModal />
-        </StoreProvider>
+        <AuthProvider>
+          <StoreProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <CartDrawer />
+            <SearchModal />
+          </StoreProvider>
+        </AuthProvider>
       </body>
     </html>
   );

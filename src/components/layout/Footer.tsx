@@ -14,11 +14,12 @@ const shopLinks = [
 ];
 
 const supportLinks = [
+  { href: "/login", label: "Sign In" },
+  { href: "/signup", label: "Create Account" },
   { href: "/account", label: "My Account" },
   { href: "/cart", label: "Shopping Cart" },
   { href: "/wishlist", label: "Wishlist" },
   { href: "/admin", label: "Admin Panel" },
-  { href: "/shop", label: "Shipping & Returns" },
 ];
 
 export function Footer() {

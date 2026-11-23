@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -30,8 +31,10 @@ export function Navbar() {
     setCartOpen,
     setSearchOpen,
   } = useStore();
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const accountHref = user ? "/account" : "/login";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -98,11 +101,14 @@ export function Navbar() {
               <Search size={18} />
             </button>
             <Link
-              href="/account"
-              aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center text-white transition-colors hover:text-dw-lime sm:flex"
+              href={accountHref}
+              aria-label={user ? "Account" : "Sign in"}
+              className="relative hidden h-10 w-10 items-center justify-center text-white transition-colors hover:text-dw-lime sm:flex"
             >
               <User size={18} />
+              {user && (
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-dw-lime" />
+              )}
             </Link>
             <Link
               href="/wishlist"
@@ -176,12 +182,21 @@ export function Navbar() {
               </Link>
             ))}
             <Link
-              href="/account"
+              href={accountHref}
               onClick={() => setMobileOpen(false)}
               className="border-b border-white/5 py-4 text-sm font-medium uppercase tracking-[0.16em] transition-colors hover:text-dw-lime"
             >
-              Account
+              {user ? "Account" : "Sign In"}
             </Link>
+            {!user && (
+              <Link
+                href="/signup"
+                onClick={() => setMobileOpen(false)}
+                className="border-b border-white/5 py-4 text-sm font-medium uppercase tracking-[0.16em] transition-colors hover:text-dw-lime"
+              >
+                Create Account
+              </Link>
+            )}
             <Link
               href="/admin"
               onClick={() => setMobileOpen(false)}

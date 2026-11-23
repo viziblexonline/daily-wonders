@@ -1,12 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Package, ShoppingBag, User } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Heart, LogOut, Package, ShoppingBag, User } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { ButtonLink } from "@/components/ui/Button";
+import { useAuth } from "@/context/AuthContext";
+import { Button, ButtonLink } from "@/components/ui/Button";
 
 export default function AccountPage() {
   const { wishlist, cartCount, orders } = useStore();
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) router.replace("/login");
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center pt-24 text-dw-muted">
+        Loading account…
+      </div>
+    );
+  }
+
+  const displayName =
+    (user.user_metadata?.full_name as string | undefined) ||
+    user.email?.split("@")[0] ||
+    "Athlete";
 
   return (
     <div className="min-h-screen bg-dw-black pt-24 pb-20">
@@ -18,8 +40,28 @@ export default function AccountPage() {
           MY ACCOUNT
         </h1>
         <p className="mt-3 text-dw-muted">
-          Welcome back. Manage your bag, wishlist, and orders.
+          Welcome back,{" "}
+          <span className="text-white">{displayName}</span>
+          {user.email ? (
+            <>
+              {" "}
+              · <span className="text-dw-soft">{user.email}</span>
+            </>
+          ) : null}
         </p>
+
+        <div className="mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              await signOut();
+              router.push("/");
+            }}
+          >
+            <LogOut size={14} /> Sign Out
+          </Button>
+        </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {[
@@ -39,7 +81,7 @@ export default function AccountPage() {
               href: "/shop",
               icon: Package,
               title: "Continue Shopping",
-              desc: "Browse the catalog",
+              desc: "Browse supplements",
             },
             {
               href: "/admin",

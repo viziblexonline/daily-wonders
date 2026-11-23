@@ -27,8 +27,8 @@ function AccountContent() {
     const type = authEvent === "signup" ? "signup" : "login";
     setBanner(
       type === "signup"
-        ? "Account created successfully — check your email for confirmation."
-        : "Login successful — check your email for confirmation."
+        ? "Account created successfully — check your inbox for the welcome email."
+        : "Login successful — a confirmation email is on the way to your inbox."
     );
 
     void notifyAuthSuccess({

@@ -1,60 +1,53 @@
-# Auth setup (Email + Google)
+# Auth setup (Email + Google) — no Resend needed
 
-## 1. Email / Password (Supabase)
+Emails go through **Supabase Auth** (free built-in mailer).
 
-1. Open Supabase → **Authentication → Providers → Email**
-2. Enable **Email**
-3. Optional: turn **Confirm email** ON/OFF
-   - OFF = instant login after signup (easier for testing)
+## 1. Enable Email provider
 
-## 2. Redirect URLs
+Authentication → Providers → **Email** → ON
 
-Supabase → **Authentication → URL Configuration**
+## 2. Turn ON Confirm email (signup success mail)
 
-**Site URL**
+Authentication → Providers → **Email** → **Confirm email** → **ON** → Save
+
+Signup pe user ko Supabase se confirmation / welcome email jayegi.
+
+## 3. Customize email messages
+
+Authentication → **Email Templates**
+
+### Confirm signup (signup success)
+- **Subject:** `Welcome to Daily Wonders — account created`
+- **Body:** apna welcome text + confirm link (link zaroori hai)
+
+### Magic Link (login success mail)
+Login ke baad app Magic Link email bhejti hai. Template change karo:
+- **Subject:** `Login successful — Daily Wonders`
+- **Body:**  
+  `You successfully signed in to Daily Wonders. If this wasn't you, reset your password.`  
+  (neeche wala link rehne do)
+
+## 4. Redirect URLs
+
+Authentication → URL Configuration
+
+Site URL:
 ```
 https://www.dailywonders.co.uk
 ```
 
-**Redirect URLs** (add all):
+Redirect URLs:
 ```
 http://localhost:3000/auth/callback
-https://dailywonders.vercel.app/auth/callback
+https://daily-wonders.vercel.app/auth/callback
 https://www.dailywonders.co.uk/auth/callback
 https://dailywonders.co.uk/auth/callback
 ```
 
-## 3. Google login
+## 5. Google (optional)
 
-### A) Google Cloud Console
-1. https://console.cloud.google.com → create/select project
-2. **APIs & Services → OAuth consent screen** → External → fill app name
-3. **Credentials → Create Credentials → OAuth client ID**
-4. Application type: **Web application**
-5. Authorized redirect URIs — add your Supabase callback:
+Providers → Google → Client ID + Secret  
+Redirect in Google Cloud:
 ```
 https://rodnhnjybgikdqfaszim.supabase.co/auth/v1/callback
 ```
-6. Copy **Client ID** + **Client Secret**
-
-### B) Supabase
-1. **Authentication → Providers → Google** → Enable
-2. Paste Client ID + Client Secret → Save
-
-## 4. Success emails (login / signup)
-
-Emails are sent via **Resend**.
-
-1. Create free account: https://resend.com
-2. API Keys → Create → copy key (`re_...`)
-3. Add to Vercel → Project → Settings → Environment Variables:
-   - `RESEND_API_KEY` = `re_...`
-   - `EMAIL_FROM` = `Daily Wonders <onboarding@resend.dev>` (test)
-4. Redeploy
-
-> With `onboarding@resend.dev` you can only send to **your Resend account email** until you verify your domain (e.g. `noreply@dailywonders.co.uk`).
-
-## 5. Test
-- `/signup` → email + password → success banner + inbox email
-- `/login` → email + password → success banner + inbox email
-- **Continue with Google** → same

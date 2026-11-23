@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dw-black: #090909;
+  --color-dw-charcoal: #151515;
+  --color-dw-surface: #1a1a1a;
+  --color-dw-border: #2a2a2a;
+  --color-dw-lime: #c6ff00;
+  --color-dw-lime-dim: #a8d900;
+  --color-dw-muted: #a3a3a3;
+  --color-dw-soft: #d4d4d4;
+  --font-display: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-dw-black);
+    color: #ffffff;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--color-dw-lime);
+    color: #090909;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gradient-overlay {
+    background: linear-gradient(
+      105deg,
+      rgba(9, 9, 9, 0.92) 0%,
+      rgba(9, 9, 9, 0.55) 45%,
+      rgba(9, 9, 9, 0.25) 100%
+    );
+  }
+
+  .gradient-overlay-strong {
+    background: linear-gradient(
+      to top,
+      rgba(9, 9, 9, 0.95) 0%,
+      rgba(9, 9, 9, 0.4) 50%,
+      rgba(9, 9, 9, 0.2) 100%
+    );
+  }
+
+  .lime-glow {
+    box-shadow: 0 0 0 1px rgba(198, 255, 0, 0.25),
+      0 8px 32px rgba(198, 255, 0, 0.12);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #151515;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+  }
+
+  .animate-fade-up {
+    animation: fadeUp 0.7s ease-out both;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out both;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.35s ease-out both;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}

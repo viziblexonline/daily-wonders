@@ -10,7 +10,7 @@ export default function SignupPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/account");
+    if (!loading && user) router.replace("/");
   }, [user, loading, router]);
 
   return (

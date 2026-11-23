@@ -12,7 +12,7 @@ function LoginContent() {
   const authError = params.get("error");
 
   useEffect(() => {
-    if (!loading && user) router.replace("/account");
+    if (!loading && user) router.replace("/");
   }, [user, loading, router]);
 
   return (

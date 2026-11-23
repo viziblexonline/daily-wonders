@@ -15,7 +15,7 @@ export async function GET(request: Request) {
           : 0;
         const isNew = Date.now() - createdAt < 60_000;
         const auth = isNew ? "signup" : "login";
-        return NextResponse.redirect(`${origin}/account?auth=${auth}`);
+        return NextResponse.redirect(`${origin}/?auth=${auth}`);
       }
       return NextResponse.redirect(
         `${origin}/login?error=${encodeURIComponent(error.message)}`

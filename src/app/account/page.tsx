@@ -1,45 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Heart, LogOut, Package, ShoppingBag, User, CheckCircle2 } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Heart, LogOut, Package, ShoppingBag, User } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { notifyAuthSuccess } from "@/lib/notifyAuth";
 
-function AccountContent() {
+export default function AccountPage() {
   const { wishlist, cartCount, orders } = useStore();
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const params = useSearchParams();
-  const authEvent = params.get("auth");
-  const [banner, setBanner] = useState("");
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [user, loading, router]);
-
-  useEffect(() => {
-    if (!user || !authEvent) return;
-
-    const type = authEvent === "signup" ? "signup" : "login";
-    setBanner(
-      type === "signup"
-        ? "Account created successfully — check your inbox for the welcome email."
-        : "Login successful — a confirmation email is on the way to your inbox."
-    );
-
-    void notifyAuthSuccess({
-      type,
-      email: user.email,
-      name: (user.user_metadata?.full_name as string | undefined) || undefined,
-    });
-
-    // Clean query so refresh doesn't re-send forever
-    router.replace("/account", { scroll: false });
-  }, [user, authEvent, router]);
 
   if (loading || !user) {
     return (
@@ -57,13 +33,6 @@ function AccountContent() {
   return (
     <div className="min-h-screen bg-dw-black pt-24 pb-20">
       <div className="mx-auto max-w-[900px] px-4 md:px-6">
-        {banner && (
-          <div className="mb-6 flex items-start gap-3 border border-dw-lime/40 bg-dw-lime/10 p-4 text-sm text-dw-lime">
-            <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-            <p>{banner}</p>
-          </div>
-        )}
-
         <p className="text-xs uppercase tracking-[0.3em] text-dw-lime">
           Account
         </p>
@@ -114,10 +83,10 @@ function AccountContent() {
               desc: "Browse supplements",
             },
             {
-              href: "/admin",
+              href: "/",
               icon: User,
-              title: "Admin Panel",
-              desc: "Manage products & orders",
+              title: "Home",
+              desc: "Back to storefront",
             },
           ].map((item) => (
             <Link
@@ -168,19 +137,5 @@ function AccountContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function AccountPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center pt-24 text-dw-muted">
-          Loading account…
-        </div>
-      }
-    >
-      <AccountContent />
-    </Suspense>
   );
 }

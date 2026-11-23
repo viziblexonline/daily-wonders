@@ -40,7 +40,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         setInfo(
           "Account created successfully! A confirmation email is on the way."
         );
-        router.push("/account?auth=signup");
+        router.push("/?auth=signup");
         return;
       }
 
@@ -50,7 +50,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         return;
       }
       setInfo("Login successful! Sending confirmation to your email…");
-      router.push("/account?auth=login");
+      router.push("/?auth=login");
     } finally {
       setLoading(false);
     }

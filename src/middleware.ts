@@ -1,7 +1,34 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_COOKIE, isValidAdminSession } from "@/lib/adminAuth";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Protect admin panel (except login page + API login)
+  if (
+    pathname.startsWith("/admin") &&
+    !pathname.startsWith("/admin/login")
+  ) {
+    const token = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (!isValidAdminSession(token)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/admin/login";
+      loginUrl.search = "";
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // If already admin-logged-in, skip login page
+  if (pathname.startsWith("/admin/login")) {
+    const token = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (isValidAdminSession(token)) {
+      const adminUrl = request.nextUrl.clone();
+      adminUrl.pathname = "/admin";
+      return NextResponse.redirect(adminUrl);
+    }
+  }
+
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -37,7 +64,6 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // Refresh session so PKCE / auth cookies stay valid
   await supabase.auth.getUser();
 
   return response;

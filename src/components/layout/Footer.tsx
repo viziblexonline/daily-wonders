@@ -19,7 +19,7 @@ const supportLinks = [
   { href: "/account", label: "My Account" },
   { href: "/cart", label: "Shopping Cart" },
   { href: "/wishlist", label: "Wishlist" },
-  { href: "/admin", label: "Admin Panel" },
+  { href: "/admin/login", label: "Admin Login" },
 ];
 
 export function Footer() {

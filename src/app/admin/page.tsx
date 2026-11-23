@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   Database,
+  LogOut,
   Package,
   Pencil,
   Plus,
@@ -58,6 +60,7 @@ const emptyForm = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
   const {
     products,
     orders,
@@ -242,6 +245,17 @@ export default function AdminPage() {
               <ShoppingBag size={16} className="text-dw-lime" />
               {orders.length} orders
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await fetch("/api/admin/logout", { method: "POST" });
+                router.replace("/admin/login");
+                router.refresh();
+              }}
+            >
+              <LogOut size={14} /> Logout
+            </Button>
           </div>
         </div>
 

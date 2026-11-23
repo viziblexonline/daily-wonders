@@ -7,6 +7,7 @@ import { PromoBanners } from "@/components/home/PromoBanners";
 import { BrandStory } from "@/components/home/BrandStory";
 import { Testimonials } from "@/components/home/Testimonials";
 import { InstagramGallery } from "@/components/home/InstagramGallery";
+import { AuthWelcomeBanner } from "@/components/auth/AuthWelcomeBanner";
 import { useStore } from "@/context/StoreContext";
 
 export default function HomePage() {
@@ -26,6 +27,7 @@ export default function HomePage() {
 
   return (
     <>
+      <AuthWelcomeBanner />
       <Hero />
       <CategoryGrid />
       <ProductRail

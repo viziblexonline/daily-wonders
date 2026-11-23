@@ -198,7 +198,7 @@ export function Navbar() {
               </Link>
             )}
             <Link
-              href="/admin"
+              href="/admin/login"
               onClick={() => setMobileOpen(false)}
               className="py-4 text-sm font-medium uppercase tracking-[0.16em] text-dw-muted transition-colors hover:text-dw-lime"
             >
